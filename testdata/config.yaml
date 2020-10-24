@@ -1,0 +1,5 @@
+acmefile: acme.json
+certdir: certs
+keydir: private
+domains:
+  - www.example.com

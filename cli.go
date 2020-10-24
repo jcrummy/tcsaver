@@ -26,7 +26,7 @@ func (c *CLI) Run() {
 	if err != nil {
 		log.Fatalf("Unable to read config file: %v", err)
 	}
-	err := c.checkACME()
+	err = c.checkACME()
 	if err != nil {
 		log.Fatalf("Unable to check acme file at least once: %v", err)
 	}
@@ -56,6 +56,10 @@ func (c *CLI) Run() {
 				err := c.checkConfig()
 				if err != nil {
 					log.Printf("Error reloading config file: %v", err)
+				}
+				err = c.checkACME()
+				if err != nil {
+					log.Printf("Error checking acme file: %v", err)
 				}
 
 			case path.Base(c.config.ACMEFile):
@@ -95,6 +99,7 @@ func (c *CLI) checkConfig() error {
 		return err
 	}
 	c.config = *newConfig
+	log.Print("New configuration loaded")
 	return nil
 }
 
@@ -143,6 +148,7 @@ func (c *CLI) saveDomain(store *acmestore.Store, domain string) {
 		log.Printf("Error saving certificate file for domain %s: %v", domain, err)
 		return
 	}
+	log.Printf("New certificate saved for domain %s", domain)
 
 	keyfile, err := os.Create(path.Join(c.config.KeyDir, domain+c.keyExtension))
 	if err != nil {
@@ -155,4 +161,5 @@ func (c *CLI) saveDomain(store *acmestore.Store, domain string) {
 		log.Printf("Error saving key file for domain %s: %v", domain, err)
 		return
 	}
+	log.Printf("New keyfile saved for domain %s", domain)
 }
