@@ -1,0 +1,14 @@
+version: '3.7'
+
+services: 
+  tcsaver:
+    image: jcrummy/tcsaver:latest
+    environment:
+      - TCSAVER_WATCH=true
+      - TCSAVER_CERT_EXTENSION=crt
+      - TCSAVER_KEY_EXTENSION=key
+    volumes:
+      - ${PWD}/config.yaml:/config.yaml
+      - ${PWD}/acme.json:/acme.json
+      - /tls/certs:/certs
+      - /tls/private:/private
