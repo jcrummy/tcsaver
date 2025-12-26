@@ -33,7 +33,10 @@ The configuration file is a YAML file with an array of domains to search for.
 domains:
   - www.example.com
   - subdomain.example.com
+extractinterval: 30m
 ```
+
+If `extractinterval` is set, in addition to watching the acme file for changes, the certificates will be loaded every specified interval even if there are no changes. The value of `extractinterval` must be any value that is accepted by [`time.ParseDuration`](https://pkg.go.dev/time#ParseDuration). Negative intervals are not allowed.
 
 ## Sample docker-compose file
 

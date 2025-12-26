@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/signal"
 	"path"
+	"time"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/jcrummy/tcsaver/acmestore"
@@ -45,14 +46,27 @@ func (c *CLI) Run() {
 		fileWatcher.Add("config.yaml")
 	}
 
+	var intervalTicker *time.Ticker
+	if c.config.ExtractInterval > 0 {
+		intervalTicker = time.NewTicker(c.config.ExtractInterval)
+	}
+
 	for {
 		select {
 		case <-shutdown:
 			return
 
+		case <-intervalTicker.C:
+			log.Printf("Interval reached, checking acme file")
+			err := c.checkACME()
+			if err != nil {
+				log.Printf("Error checking acme file: %v", err)
+			}
+
 		case event := <-fileWatcher.Events:
 			switch path.Base(event.Name) {
 			case "config.yaml":
+				log.Printf("Config file change detected: %s", event.String())
 				err := c.checkConfig()
 				if err != nil {
 					log.Printf("Error reloading config file: %v", err)
@@ -63,6 +77,7 @@ func (c *CLI) Run() {
 				}
 
 			case path.Base(c.config.ACMEFile):
+				log.Printf("ACME file change detected: %s", event.String())
 				err := c.checkACME()
 				if err != nil {
 					log.Printf("Error checking acme file: %v", err)
@@ -99,7 +114,7 @@ func (c *CLI) checkConfig() error {
 		return err
 	}
 	c.config = *newConfig
-	log.Print("New configuration loaded")
+	log.Printf("New configuration loaded: %#v", c.config)
 	return nil
 }
 
