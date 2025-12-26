@@ -2,9 +2,10 @@ name: Build and Push Docker Image
 
 on:
   push:
-    branches:
-      - main
-  pull_request:
+    tags: [ v* ]
+
+env:
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   build:
@@ -18,6 +19,9 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ secrets.DOCKER_USERNAME }}/my-image
+          tags: |
+            # set latest tag for main branch
+            type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
